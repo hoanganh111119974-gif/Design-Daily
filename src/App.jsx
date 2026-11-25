@@ -291,11 +291,12 @@ export default function App() {
   // Realtime Dashboard Metrics
   const dashboardStats = useMemo(() => {
     const totalTasks = tasks.length;
+    const doneTasksCount = tasks.filter((t) => t.status === 'Đã xong').length;
     const totalWorkload = tasks.reduce((sum, t) => sum + Number(t.workload || 0), 0);
     const doneWorkload = tasks
       .filter((t) => t.status === 'Đã xong')
       .reduce((sum, t) => sum + Number(t.workload || 0), 0);
-    const progressPct = totalWorkload > 0 ? Math.round((doneWorkload / totalWorkload) * 100) : 0;
+    const progressPct = totalTasks > 0 ? Math.round((doneTasksCount / totalTasks) * 100) : 0;
     const urgentPending = tasks.filter((t) => Number(t.priority) === 3 && t.status !== 'Đã xong').length;
     const overdueCount = tasks.filter((t) => isOverdue(t)).length;
 
@@ -320,7 +321,16 @@ export default function App() {
       };
     });
 
-    return { totalTasks, totalWorkload, doneWorkload, progressPct, urgentPending, overdueCount, memberStats };
+    return {
+      totalTasks,
+      doneTasksCount,
+      totalWorkload,
+      doneWorkload,
+      progressPct,
+      urgentPending,
+      overdueCount,
+      memberStats,
+    };
   }, [tasks]);
 
   // Report Metrics (Weekly / Monthly)
@@ -608,7 +618,12 @@ export default function App() {
               </div>
 
               <div className="bg-white p-4 rounded-xl border border-neutral-200">
-                <div className="text-xs text-neutral-500 font-medium">Tiến độ theo độ nặng</div>
+                <div className="text-xs text-neutral-500 font-medium flex items-center justify-between">
+                  <span>Tiến độ hoàn thành</span>
+                  <span className="font-semibold text-neutral-800">
+                    {dashboardStats.doneTasksCount}/{dashboardStats.totalTasks} ~ {dashboardStats.progressPct}%
+                  </span>
+                </div>
                 <div className="mt-2 flex items-center gap-3">
                   <span className="text-2xl font-bold">{dashboardStats.progressPct}%</span>
                   <div className="flex-1 h-2 bg-neutral-100 rounded-full overflow-hidden">
